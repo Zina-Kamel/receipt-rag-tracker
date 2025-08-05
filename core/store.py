@@ -33,10 +33,8 @@ class FaissStore:
         return results
 
     def save(self):
-        # Save faiss index
         faiss.write_index(self.index, self.index_path)
 
-        # Save metadata + texts together as JSON
         with open(self.metadata_path, "w") as f:
             json.dump({
                 "texts": self.texts,
@@ -45,13 +43,11 @@ class FaissStore:
         print(f"Saved index to {self.index_path} and metadata to {self.metadata_path}")
 
     def load(self):
-        # Load faiss index
         if os.path.exists(self.index_path):
             self.index = faiss.read_index(self.index_path)
         else:
             raise FileNotFoundError(f"{self.index_path} not found")
 
-        # Load metadata
         if os.path.exists(self.metadata_path):
             with open(self.metadata_path, "r") as f:
                 metadata_data = json.load(f)

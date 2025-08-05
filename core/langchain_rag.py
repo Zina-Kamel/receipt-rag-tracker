@@ -7,10 +7,8 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from core.store import FaissStore
 from langchain.docstore.in_memory import InMemoryDocstore
 
-# Initialize LLM (Gemini)
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest", google_api_key=os.environ["GEMINI_API_KEY"])
 
-# Embedding model must match the one you use when creating embeddings
 embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 def load_langchain_vectorstore():
@@ -19,16 +17,15 @@ def load_langchain_vectorstore():
 
     documents = [Document(page_content=text, metadata=meta) for text, meta in zip(fs.texts, fs.metadata)]
 
-    # Use InMemoryDocstore, not a dict
     docstore = InMemoryDocstore({str(i): doc for i, doc in enumerate(documents)})
 
     index_to_docstore_id = {i: str(i) for i in range(len(documents))}
 
     vectorstore = FAISS(
-        embedding_model.embed_query,  # embedding function
-        fs.index,                     # loaded FAISS index
-        docstore,                    # InMemoryDocstore instance
-        index_to_docstore_id         # mapping index to docstore id
+        embedding_model.embed_query,  
+        fs.index,                     
+        docstore,                   
+        index_to_docstore_id        
     )
     
     print(f"Loaded FAISS index size: {fs.index.ntotal}")

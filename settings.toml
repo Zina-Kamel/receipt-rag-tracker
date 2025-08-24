@@ -10,7 +10,7 @@ DATA_DIR = "data"
 
 # Models
 BASE_MODEL_NAME = "mistralai/Mistral-7B-v0.1"
-FINETUNED_MODEL_DIR = "/usr/local/data/zkamel/receipt-rag-tracker/mlruns/277381938256989260/d9843dc5c82d4b7a8dbcc95539d492ae/artifacts/model/checkpoint-1838"
+FINETUNED_MODEL_DIR = "./mlruns/277381938256989260/d9843dc5c82d4b7a8dbcc95539d492ae/artifacts/model/checkpoint-1838"
 GEMINI_MODEL = "gemini-1.5-flash-latest"
 
 # FAISS stores

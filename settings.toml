@@ -1,0 +1,21 @@
+[default]
+# App
+APP_NAME = "Receipt Analyzer and Financial Advisor"
+OFFLOAD_DIR = "./offload"
+EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+
+# Dataset
+FINETUNE_INVOICES_DATASET = "mychen76/invoices-and-receipts_ocr_v1"
+DATA_DIR = "data"
+
+# Models
+BASE_MODEL_NAME = "mistralai/Mistral-7B-v0.1"
+FINETUNED_MODEL_DIR = "/usr/local/data/zkamel/receipt-rag-tracker/mlruns/277381938256989260/d9843dc5c82d4b7a8dbcc95539d492ae/artifacts/model/checkpoint-1838"
+GEMINI_MODEL = "gemini-1.5-flash-latest"
+
+# FAISS stores
+FAISS_RECEIPTS_STORE_NAME = "receipts_store"
+FAISS_TIPS_STORE_NAME = "tips_store"
+
+# PDF
+PDF_TITLE = "Receipt Spending Report"

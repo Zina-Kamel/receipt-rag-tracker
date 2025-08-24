@@ -1,57 +1,85 @@
-import cv2
-import numpy as np
-from PIL import Image, ImageEnhance, ImageOps
-import pdfplumber
-import requests
-import tempfile
 import json
-from paddleocr import PaddleOCR
-from PIL import Image
+from typing import List, Union
+import logging
+
 import numpy as np
+from PIL import Image
+import pdfplumber
+import paddle
+from paddleocr import PaddleOCR
 
-def preprocess_image(pil_img: Image.Image) -> Image.Image:
-    img = ImageOps.exif_transpose(pil_img)
-    img = img.convert("L")
-    enhancer = ImageEnhance.Contrast(img)
-    img = enhancer.enhance(2.0)
-
-    img_np = np.array(img)
-    img_np = cv2.fastNlMeansDenoising(img_np, h=10)
-    _, img_np = cv2.threshold(img_np, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    return Image.fromarray(img_np)
-
-def ocr_space_file(pil_img: Image.Image, overlay=False, api_key='helloworld', language='eng') -> str:
-    with tempfile.NamedTemporaryFile(suffix='.png') as tmp:
-        pil_img.save(tmp.name)
-        payload = {
-            'isOverlayRequired': overlay,
-            'apikey': api_key,
-            'language': language,
-        }
-        with open(tmp.name, 'rb') as f:
-            r = requests.post(
-                'https://api.ocr.space/parse/image',
-                files={tmp.name: f},
-                data=payload,
-            )
-    result = json.loads(r.content.decode())
-    parsed = result.get("ParsedResults", [{}])[0].get("ParsedText", "")
-    return parsed
-
-ocr_engine = PaddleOCR(use_angle_cls=True, lang='en')
-
-def run_paddleocr(pil_image: Image.Image) -> str:
-    image_np = np.array(pil_image.convert("RGB"))
-    results = ocr_engine.ocr(image_np)
-    text_lines = [line[1][0] for result in results for line in result]
-    return "\n".join(text_lines)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-def pdf_to_images(pdf_path: str) -> list[Image.Image]:
-    images = []
-    with pdfplumber.open(pdf_path) as pdf:
+def create_ocr_engine(device: str = None) -> PaddleOCR:
+    """
+    Initialize a PaddleOCR engine.
+    
+    Args:
+        device: 'cpu' or 'gpu'. If None, auto-detects GPU availability.
+        
+    Returns:
+        PaddleOCR instance.
+    """
+    if device is None:
+        device = "gpu" if paddle.device.is_compiled_with_cuda() else "cpu"
+    logger.info(f"[OCR] Initializing PaddleOCR on {device.upper()}")
+
+    return PaddleOCR(
+        use_doc_orientation_classify=False,
+        use_doc_unwarping=False,
+        use_textline_orientation=False,
+        lang='en',
+        device=device,
+    )
+
+
+def run_paddleocr(pil_image: Image.Image, ocr_engine: PaddleOCR) -> str:
+    """
+    Run OCR on a PIL image and return recognized words as JSON.
+    
+    Args:
+        pil_image: PIL.Image.Image to process.
+        ocr_engine: Pre-initialized PaddleOCR engine.
+        
+    Returns:
+        JSON string containing OCR words.
+    """
+    image_np = np.array(pil_image.convert("RGB"), dtype=np.uint8)
+
+    try:
+        results = ocr_engine.predict(image_np)
+    except Exception as e:
+        logger.warning(f"[OCR WARNING] OCR failed on GPU: {e}")
+        logger.info("[OCR] Retrying on CPU...")
+        cpu_engine = create_ocr_engine(device="cpu")
+        results = cpu_engine.predict(image_np)
+
+    rec_texts: List[str] = []
+    for res in results:
+        rec_texts.extend(res.get("rec_texts", []))
+
+    json_dict = {"ocr_words": rec_texts}
+    return json.dumps(json_dict, ensure_ascii=False)
+
+
+def pdf_to_images(pdf_file: Union[str, bytes]) -> List[Image.Image]:
+    """
+    Convert a PDF file (path or bytes) to a list of PIL images.
+    
+    Args:
+        pdf_file: File path or bytes-like object representing the PDF.
+        
+    Returns:
+        List of PIL.Image.Image objects, one per page.
+    """
+    images: List[Image.Image] = []
+
+    with pdfplumber.open(pdf_file) as pdf:
         for page in pdf.pages:
             pil_image = page.to_image(resolution=300).original
             images.append(pil_image)
+
+    logger.info(f"[PDF] Converted {len(images)} pages to images.")
     return images

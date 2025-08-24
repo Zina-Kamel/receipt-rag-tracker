@@ -1,6 +1,6 @@
 # Receipt Tracker and Financial Advisor App
 
-This RAG-based web application aims at solving the problem of manually tracking and searching through receipts. It also offers a smart financial advisor chat-bot that offers personalised 
+This RAG-based web application aims at solving the problem of manually tracking and searching through receipts. You can upload your receipt and ask questions about stored receipts. It also offers a smart financial advisor chat-bot that offers personalised 
 recommendations based on your spending and relevant scraped tips. 
 
 ## 🚀 Features

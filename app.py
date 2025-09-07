@@ -90,21 +90,21 @@ def generate_json(text, max_retries=5, allowed_categories=""):
  
     base_prompt = f"""Extract information from the following receipt OCR text.
 
-OCR Text:
-{ocr_words_str}
+    OCR Text:
+    {ocr_words_str}
 
-Required JSON format:
-{{
-  "store": "string",
-  "date": "string", 
-  "items": [
-    {{"name": "string", "price": 0.0}}
-  ],
-  "category": "string (must be one of: {allowed_categories})",
-  "total": 0.0
-}}
+    Required JSON format:
+    {{
+    "store": "string",
+    "date": "string", 
+    "items": [
+        {{"name": "string", "price": 0.0}}
+    ],
+    "category": "string (must be one of: {allowed_categories})",
+    "total": 0.0
+    }}
 
-JSON:"""
+    JSON:"""
 
     for attempt in range(max_retries):
         inputs = tokenizer(base_prompt, return_tensors="pt", truncation=True, max_length=1024)
@@ -143,16 +143,13 @@ JSON:"""
         generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
         try:
-            last_open_brace = generated.rfind('JSON:')+5  # Start after 'JSON:'
+            last_open_brace = generated.rfind('JSON:')+5  
             
             last_close_brace = generated.rfind('}')
-            
             
             if last_open_brace != -1 and last_close_brace != -1 and last_close_brace > last_open_brace:
                 json_str = generated[last_open_brace:last_close_brace + 1]
                 parsed = json.loads(json_str)
-                
-                # Validate required fields
                 required_fields = ["store", "date", "total", "items", "category"]
                 if all(field in parsed for field in required_fields) and isinstance(parsed["items"], list):
                     return parsed
@@ -208,13 +205,13 @@ def top_vendors_by_spend(df, top_n=5, start_date=None, end_date=None):
 
 def classify_query_type(query: str, llm, threshold=0.5):
     prompt = f"""
-You are a helpful assistant that classifies a user's query into two categories: "aggregate" or "rag".
-"aggregate" means statistics, totals, counts, averages, or comparisons across multiple receipts.
-"rag" means details from specific receipts or textual information retrieval.
-Classify ONLY, output exactly one word: aggregate or rag.
-Query: "{query}"
-Answer:
-"""
+    You are a helpful assistant that classifies a user's query into two categories: "aggregate" or "rag".
+    "aggregate" means statistics, totals, counts, averages, or comparisons across multiple receipts.
+    "rag" means details from specific receipts or textual information retrieval.
+    Classify ONLY, output exactly one word: aggregate or rag.
+    Query: "{query}"
+    Answer:
+    """
     response = llm.invoke(prompt)
     classification = response.content.strip().lower()
     return classification if classification in ("aggregate","rag") else "rag"
@@ -312,7 +309,6 @@ with tabs[0]:
     value="food,transport,entertainment,shopping,utilities,grocery"
     )
     allowed_categories = [c.strip().lower() for c in allowed_categories_input.split(",") if c.strip()]
-
 
     st.header("Upload New Receipts")
     uploaded = st.file_uploader("Upload receipt image or PDF", type=["jpg","jpeg","png","pdf"])
@@ -480,8 +476,7 @@ with tabs[2]:
             total_spent = df['total'].sum() if not df.empty else 0
             top_cat = df.groupby('category')['total'].sum().sort_values(ascending=False).head(3).to_dict() if not df.empty else {}
             spending_summary = f"Total spent: ${total_spent:.2f}. Top categories: {top_cat}"
-            tips_results = faiss_tips_store.search(np.array(embedding_model.embed_query(user_q), dtype=np.float32)
-, k=15)
+            tips_results = faiss_tips_store.search(np.array(embedding_model.embed_query(user_q), dtype=np.float32), k=15)
 
             tip_texts = [meta['content'] for _, meta in tips_results if meta.get("type") == "tip"]
             system_prompt = (

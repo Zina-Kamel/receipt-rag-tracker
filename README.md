@@ -12,27 +12,47 @@
 ![FAISS](https://img.shields.io/badge/FAISS-0080FF?style=flat&logo=faiss&logoColor=white)
 ![CUDA](https://img.shields.io/badge/CUDA-FF9900?style=flat&logo=nvidia&logoColor=white)
 
+This RAG-powered web application simplifies receipt management and financial insights retreival. Users upload their receipts, automatically extract and store the information, and ask questions to quickly retrieve details or summaries from all stored receipts. Additionally, the built-in AI financial advisor provides personalized, actionable recommendations based on the spending patterns and and relevant scraped tips. 
 
-This RAG-based web application aims at solving the problem of manually tracking and searching through receipts. You can upload your receipt and ask questions about stored receipts. It also offers a smart financial advisor chat-bot that offers personalised 
-recommendations based on your spending and relevant scraped tips. 
-
-## 🚀 Features
+## Features
 
 - **OCR Extraction**: Automatically extract text from images and PDFs using PaddleOCR.
 - **LLM-Based Parsing**: LoRA Fine-tuned LLM to convert raw OCR text into a structured JSON schema receipts.
-- **FAISS Storage**: Store and index receipts for retrieval-augmented generation (RAG) queries.
+- **FAISS Storage**: Store and index receipts for retrieval-augmented generation queries.
 - **Spending Analysis**: Generate summaries, top vendors, monthly spend, and other spending statistics.
 - **Interactive Queries**: Ask both aggregate questions (totals, counts, averages) and RAG queries (details from specific receipts).
 - **PDF Reporting**: Export detailed financial reports.
 - **AI Financial Advisor**: Receive actionable tips based on your receipts and spending habits.
 
-## 🛠 Technologies
 
+## Getting Started
 
-## ⚙️ Installation
+### 1. Clone the repository
+```bash
+git clone https://github.com/Zina-Kamel/receipt-rag-tracker.git
+cd receipt-rag-tracker
+```
 
+### 2. Install dependencies
 
-## Demo
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Set environment variables
+
+In .scretes.toml file, add your API Keys
+
+```bash
+GEMINI_API_KEY=
+LANGSMITH_API_KEY=
+OPENAI_API_KEY=
+```
+### 4. Run the Streamlit app
+
+```bash
+streamlit run app.py
+```
 
 
 
